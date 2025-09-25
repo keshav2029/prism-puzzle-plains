@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multiplication Mastery with Milo</title>
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: linear-gradient(145deg, #e4d4d4, #4e432c);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      font-weight: bolder;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.03),
+                  inset 0 0 60px rgba(0, 0, 0, 0.5);
+      color: #122131;
+    }
+    #logo {
+      position: fixed;
+      top: 5px;
+      right: 40px;
+      width: 50px;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+    #logo:hover {
+      transform: scale(1.05);
+    }
+    #container {
+      display: flex;
+      width: 97vw;
+      max-width: 1600px;
+      height: calc(100vh - 80px);
+      margin: 40px auto;
+      gap: 1vw;
+    }
+    #left-panel {
+      width: 40%;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    #question-box {
+      position: relative;
+      width: 100%;
+      height: calc(100% - 0px);
+      border: 2px solid #122131;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    #question-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("https://raw.githubusercontent.com/keshav2029/Images/refs/heads/main/Grade2.bmp") no-repeat center center;
+      background-size: cover;
+      opacity: 0.3;
+      z-index: -1;
+    }
+    #question {
+      font-size: 18px;
+      font-weight: 700;  
+      color: black;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      text-shadow: 0 0 9px rgba(255, 255, 255, 0.9);
+    }
+    .dropZone {
+      width: 100px;
+      height: 40px;
+      border: 2px dashed #1976d2;
+      border-radius: 6px;
+      display: inline-block;
+      line-height: 40px;
+      text-align: center;
+      background: #e8f0fe;
+      margin: 5px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    .dropZone.correct {
+      background: #dcedc8;
+      border: 2px solid #4caf50;
+    }
+    .dropZone.wrong {
+      background: #ffebee;
+      border: 2px solid #d32f2f;
+    }
+    .dropZone.disabled {
+      cursor: not-allowed;
+    }
+    .draggable {
+      display: inline-block;
+      padding: 10px;
+      margin: 5px;
+      background: #e8f0fe;
+      border: 2px solid #1976d2;
+      border-radius: 6px;
+      cursor: move;
+      user-select: none;
+    }
+    .draggable.correct {
+      background: #dcedc8;
+      border: 2px solid #4caf50;
+    }
+    .draggable.wrong {
+      background: #ffebee;
+      border: 2px solid #d32f2f;
+    }
+    #submitBtn, #nextBtn, #restartBtn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    #submitBtn {
+      background: #1976d2;
+    }
+    #submitBtn:hover:not(:disabled) {
+      background: #1565c0;
+      transform: translateY(-2px);
+    }
+    #submitBtn:disabled {
+      background: #b0bec5;
+      cursor: not-allowed;
+    }
+    #nextBtn {
+      background: #4caf50;
+      display: none;
+    }
+    #nextBtn:hover {
+      background: #43a047;
+      transform: translateY(-2px);
+    }
+    #restartBtn {
+      background: #f57c00;
+      margin-left: 10px;
+    }
+    #restartBtn:hover {
+      background: #ef6c00;
+      transform: translateY(-2px);
+    }
+    #result {
+      font-size: 18px;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+    #progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+    #progress-fill {
+      height: 100%;
+      background: #1976d2;
+      transition: width 0.5s ease;
+    }
+    #right-panel {
+      width: 54%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    canvas {
+      width: 100%;
+      height: calc(100% - 0px);
+      border: 2px solid #122131;
+      background: #ffffff;
+      border-radius: 8px;
+    }
+    #tools-panel {
+      width: 3%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      background: #d0c8c8;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    .tools button, .tools select, .tools input {
+      width: 28px;
+      height: 28px;
+      margin: 5px 0;
+      padding: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 2px solid #1976d2;
+      border-radius: 6px;
+      background: #626d80;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tools button:hover, .tools select:hover, .tools input:hover {
+      background: #bbdefb;
+      transform: translateY(-2px);
+    }
+    #colorPicker {
+      padding: 0;
+      width: 28px;
+      height: 28px;
+    }
+    #canvasTextInput {
+      position: absolute;
+      display: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      padding: 8px;
+      border: 2px solid #1976d2;
+      background: #ffffff;
+      z-index: 10;
+      width: 200px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    #congratsModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffffff;
+      border: 2px solid #1976d2;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      z-index: 1000;
+      max-width: 400px;
+    }
+    #congratsModal h2 {
+      color: #1a3c64;
+      font-size: 24px;
+      margin: 0 0 15px;
+    }
+    #congratsModal p {
+      color: #4caf50;
+      font-size: 18px;
+      margin: 0 0 20px;
+    }
+    #closeModalBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      background: #1976d2;
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    #closeModalBtn:hover {
+      background: #1565c0;
+      transform: translateY(-2px);
+    }
+    @media (max-width: 900px) {
+      #container {
+        flex-direction: column;
+        height: auto;
+        margin: 20px auto;
+        gap: 10px;
+      }
+      #left-panel {
+        width: 100%;
+        min-height: 50vh;
+      }
+      #right-panel {
+        width: 100%;
+        min-height: 50vh;
+      }
+      canvas {
+        height: 40vh;
+      }
+      #tools-panel {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 10px;
+      }
+      .tools button, .tools select, .tools input {
+        margin: 5px;
+      }
+      #congratsModal {
+        width: 90%;
+      }
+      .dropZone, .draggable {
+        width: 90px;
+        height: 36px;
+        font-size: 14px;
+      }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #question-box, #congratsModal {
+      animation: fadeIn 0.5s ease-out;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<img id="logo" src="https://www.schooli.online/images/schooli-logo.png" alt="Schooli Logo">
+
+<div id="container">
+  <div id="left-panel">
+    <div id="question-box">
+      <div id="question"></div>
+      <div id="mcqOptions"></div>
+      <div id="dropZones"></div>
+      <div>
+        <button id="submitBtn" disabled>Submit</button>
+        <button id="nextBtn">Next Question</button>
+        <button id="restartBtn">Restart Quiz</button>
+      </div>
+      <div id="result"></div>
+      <div id="progress-bar">
+        <div id="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+  <div id="right-panel">
+    <canvas id="drawCanvas"></canvas>
+    <input type="text" id="canvasTextInput">
+  </div>
+  <div id="tools-panel">
+    <div class="tools">
+      <button id="brushBtn" aria-label="Select brush tool">🖌️</button>
+      <button id="eraserBtn" aria-label="Select eraser tool">🧽</button>
+      <select id="shapeSelector" aria-label="Select shape to draw">
+        <option value="none">➖</option>
+        <option value="circle">🔵</option>
+        <option value="rectangle">⬛</option>
+        <option value="square">🟥</option>
+        <option value="triangle">🔺</option>
+      </select>
+      <input type="color" id="colorPicker" value="#000000" aria-label="Select drawing color">
+      <button id="textBtn" aria-label="Add text to canvas">🔤</button>
+      <button id="dragBtn" aria-label="Drag shapes on canvas">🖐️</button>
+      <button id="clearBtn" aria-label="Clear canvas">🔄</button>
+    </div>
+  </div>
+</div>
+
+<div id="congratsModal">
+  <h2>Congratulations!</h2>
+  <p>You’re stacking up success, Vera! Calculate those volumes!</p>
+  <button id="closeModalBtn" aria-label="Close congratulations modal">Close</button>
+</div>
+
+<script>
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  const congratsModal = document.getElementById('congratsModal');
+  let drawing = false, erasing = false, currentShape = 'none', addingText = false, dragging = false;
+  let startX, startY, endX, endY;
+  let currentColor = '#000000';
+  const textInput = document.getElementById('canvasTextInput');
+  let dropZones = [];
+  let submitBtn = document.getElementById('submitBtn');
+  let shapes = [];
+  let drawnPath = [];
+  let selectedShape = null;
+  let moving = false;
+  let offsetX, offsetY;
+  let lastRedrawTime = 0;
+  const REDRAW_INTERVAL = 16; // ~60 FPS
+  const ERASER_RADIUS = 10;
+  let previewShape = null;
+
+  // Audio Context for sound effects
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  document.addEventListener('click', () => {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }, { once: true });
+
+  function playSound(frequency, duration, type = 'sine') {
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + duration);
+  }
+
+  function playCongratsSound() {
+    const notes = [600, 800, 1000];
+    notes.forEach((freq, index) => {
+      setTimeout(() => playSound(freq, 0.2, 'triangle'), index * 200);
+    });
+  }
+
+  function normalizeInput(input) {
+    return input ? input.trim().toLowerCase().replace(/\s+/g, ' ') : '';
+  }
+
+  function getCanvasCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    return {
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  function isPointInShape(x, y, shape, forDragging = false) {
+    const hitboxPadding = forDragging ? 15 : 10;
+    if (shape.type === 'circle') {
+      const radius = Math.sqrt((shape.endX - shape.startX) ** 2 + (shape.endY - shape.startY) ** 2);
+      const distance = Math.sqrt((x - shape.startX) ** 2 + (y - shape.startY) ** 2);
+      return forDragging ? distance <= radius + hitboxPadding : Math.abs(distance - radius) <= hitboxPadding;
+    } else if (shape.type === 'rectangle' || shape.type === 'square') {
+      const minX = Math.min(shape.startX, shape.endX);
+      const maxX = Math.max(shape.startX, shape.endX);
+      const minY = Math.min(shape.startY, shape.endY);
+      const maxY = Math.max(shape.startY, shape.endY);
+      if (forDragging) {
+        return x >= minX - hitboxPadding && x <= maxX + hitboxPadding && y >= minY - hitboxPadding && y <= maxY + hitboxPadding;
+      }
+      const nearLeft = Math.abs(x - minX) <= hitboxPadding && y >= minY && y <= maxY;
+      const nearRight = Math.abs(x - maxX) <= hitboxPadding && y >= minY && y <= maxY;
+      const nearTop = Math.abs(y - minY) <= hitboxPadding && x >= minX && x <= maxX;
+      const nearBottom = Math.abs(y - maxY) <= hitboxPadding && x >= minX && x <= maxX;
+      return nearLeft || nearRight || nearTop || nearBottom;
+    } else if (shape.type === 'triangle') {
+      const x1 = shape.startX, y1 = shape.startY;
+      const x2 = shape.endX, y2 = shape.endY;
+      const x3 = shape.startX - (shape.endX - shape.startX), y3 = shape.endY;
+      if (forDragging) {
+        const minX = Math.min(x1, x2, x3), maxX = Math.max(x1, x2, x3);
+        const minY = Math.min(y1, y2, y3), maxY = Math.max(y1, y2, y3);
+        return x >= minX - hitboxPadding && x <= maxX + hitboxPadding && y >= minY - hitboxPadding && y <= maxY + hitboxPadding;
+      }
+      const dist1 = distanceToSegment(x, y, x1, y1, x2, y2);
+      const dist2 = distanceToSegment(x, y, x2, y2, x3, y3);
+      const dist3 = distanceToSegment(x, y, x3, y3, x1, y1);
+      return Math.min(dist1, dist2, dist3) <= hitboxPadding;
+    } else if (shape.type === 'text') {
+      ctx.font = '20px Inter';
+      const metrics = ctx.measureText(shape.text);
+      const width = metrics.width;
+      const height = 20;
+      return x >= shape.startX - hitboxPadding && x <= shape.startX + width + hitboxPadding &&
+             y >= shape.startY - hitboxPadding && y <= shape.startY + height + hitboxPadding;
+    } else if (shape.type === 'sector') {
+      const radius = Math.sqrt((shape.endX - shape.startX) ** 2 + (shape.endY - shape.startY) ** 2);
+      const distance = Math.sqrt((x - shape.startX) ** 2 + (y - shape.startY) ** 2);
+      if (distance > radius + hitboxPadding) return false;
+      const angle = Math.atan2(y - shape.startY, x - shape.startX);
+      const startAngle = shape.startAngle;
+      const endAngle = shape.endAngle;
+      const normalizedAngle = (angle - startAngle + 2 * Math.PI) % (2 * Math.PI);
+      return normalizedAngle <= (endAngle - startAngle);
+    }
+    return false;
+  }
+
+  function distanceToSegment(px, py, x1, y1, x2, y2) {
+    const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    if (l2 === 0) return Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
+    const t = Math.max(0, Math.min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2));
+    const projectionX = x1 + t * (x2 - x1);
+    const projectionY = y1 + t * (y2 - y1);
+    return Math.sqrt((px - projectionX) ** 2 + (py - projectionY) ** 2);
+  }
+
+  function splitPathSegment(segment, x, y) {
+    const newSegments = [];
+    let currentSegment = { points: [], color: segment.color };
+    let inGap = false;
+
+    segment.points.forEach((point, i) => {
+      const dist = Math.hypot(x - point.x, y - point.y);
+      if (dist <= ERASER_RADIUS) {
+        if (currentSegment.points.length > 1) {
+          newSegments.push(currentSegment);
+          currentSegment = { points: [], color: segment.color };
+        }
+        inGap = true;
+      } else {
+        if (inGap && currentSegment.points.length > 0) {
+          newSegments.push(currentSegment);
+          currentSegment = { points: [], color: segment.color };
+        }
+        inGap = false;
+        currentSegment.points.push(point);
+      }
+    });
+
+    if (currentSegment.points.length > 1) {
+      newSegments.push(currentSegment);
+    }
+    return newSegments;
+  }
+
+  function keepShapeInBounds(shape) {
+    const padding = 50;
+    const minX = padding;
+    const minY = padding;
+    const maxX = canvas.width - padding;
+    const maxY = canvas.height - padding;
+
+    if (shape.type === 'text') {
+      ctx.font = '20px Inter';
+      const metrics = ctx.measureText(shape.text);
+      const width = metrics.width;
+      const height = 20;
+      shape.startX = Math.max(minX, Math.min(shape.startX, maxX - width - 5));
+      shape.startY = Math.max(minY, Math.min(shape.startY, maxY - height - 5));
+    } else if (shape.type === 'sector') {
+      shape.startX = Math.max(minX, Math.min(shape.startX, maxX));
+      shape.startY = Math.max(minY, Math.min(shape.startY, maxY));
+    } else {
+      const shapeMinX = Math.min(shape.startX, shape.endX);
+      const shapeMaxX = Math.max(shape.startX, shape.endX);
+      const shapeMinY = Math.min(shape.startY, shape.endY);
+      const shapeMaxY = Math.max(shape.startY, shape.endY);
+
+      if (shapeMinX < minX) {
+        shape.startX += minX - shapeMinX;
+        shape.endX += minX - shapeMinX;
+      }
+      if (shapeMaxX > maxX) {
+        shape.startX -= shapeMaxX - maxX;
+        shape.endX -= shapeMaxX - maxX;
+      }
+      if (shapeMinY < minY) {
+        shape.startY += minY - shapeMinY;
+        shape.endY += minY - shapeMinY;
+      }
+      if (shapeMaxY > maxY) {
+        shape.startY -= shapeMaxY - maxY;
+        shape.endY -= shapeMaxY - maxY;
+      }
+    }
+  }
+
+  function drawGrid(x, y, width, height, cellSize) {
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= width; i += cellSize) {
+      ctx.beginPath();
+      ctx.moveTo(x + i, y);
+      ctx.lineTo(x + i, y + height);
+      ctx.stroke();
+    }
+    for (let i = 0; i <= height; i += cellSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, y + i);
+      ctx.lineTo(x + width, y + i);
+      ctx.stroke();
+    }
+  }
+
+  function drawAreaModel(rows, columns, x, y, cellSize) {
+    shapes = [];
+    for (let i = 0; i < rows.length; i++) {
+      for (let j = 0; j < columns[i]; j++) {
+        shapes.push({
+          type: 'rectangle',
+          startX: x + j * cellSize,
+          startY: y + i * cellSize,
+          endX: x + (j + 1) * cellSize,
+          endY: y + (i + 1) * cellSize,
+          color: '#ffd700'
+        });
+      }
+    }
+  }
+
+  function redrawCanvas(tempShape = null) {
+    const now = performance.now();
+    if (now - lastRedrawTime < REDRAW_INTERVAL) return;
+    lastRedrawTime = now;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawnPath.forEach(segment => {
+      ctx.strokeStyle = segment.color;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      segment.points.forEach((point, i) => {
+        if (i === 0) {
+          ctx.moveTo(point.x, point.y);
+        } else {
+          ctx.lineTo(point.x, point.y);
+        }
+      });
+      ctx.stroke();
+    });
+
+    shapes.forEach(shape => {
+      ctx.strokeStyle = shape === selectedShape ? '#d32f2f' : shape.color;
+      ctx.fillStyle = shape === selectedShape ? '#d32f2f' : shape.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (shape.type === 'circle') {
+        const radius = Math.sqrt((shape.endX - shape.startX) ** 2 + (shape.endY - shape.startY) ** 2);
+        ctx.arc(shape.startX, shape.startY, radius, 0, 2 * Math.PI);
+        ctx.fill();
+      } else if (shape.type === 'rectangle') {
+        ctx.fillRect(shape.startX, shape.startY, shape.endX - shape.startX, shape.endY - shape.startY);
+      } else if (shape.type === 'square') {
+        const size = Math.min(Math.abs(shape.endX - shape.startX), Math.abs(shape.endY - shape.startY));
+        const offsetX = (shape.endX >= shape.startX) ? size : -size;
+        const offsetY = (shape.endY >= shape.startY) ? size : -size;
+        ctx.fillRect(shape.startX, shape.startY, offsetX, offsetY);
+      } else if (shape.type === 'triangle') {
+        ctx.moveTo(shape.startX, shape.startY);
+        ctx.lineTo(shape.endX, shape.endY);
+        ctx.lineTo(shape.startX - (shape.endX - shape.startX), shape.endY);
+        ctx.closePath();
+        ctx.fill();
+      } else if (shape.type === 'text') {
+        ctx.font = '20px Inter';
+        ctx.fillText(shape.text, shape.startX, shape.startY + 20);
+      } else if (shape.type === 'sector') {
+        ctx.beginPath();
+        ctx.moveTo(shape.startX, shape.startY);
+        ctx.arc(shape.startX, shape.startY, Math.sqrt((shape.endX - shape.startX) ** 2 + (shape.endY - shape.startY) ** 2), shape.startAngle, shape.endAngle);
+        ctx.closePath();
+        ctx.fill();
+      }
+    });
+
+    if (tempShape) {
+      ctx.strokeStyle = currentColor;
+      ctx.fillStyle = currentColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (tempShape.type === 'circle') {
+        const radius = Math.sqrt((tempShape.endX - tempShape.startX) ** 2 + (tempShape.endY - tempShape.startY) ** 2);
+        ctx.arc(tempShape.startX, tempShape.startY, radius, 0, 2 * Math.PI);
+        ctx.fill();
+      } else if (tempShape.type === 'rectangle') {
+        ctx.fillRect(tempShape.startX, tempShape.startY, tempShape.endX - tempShape.startX, tempShape.endY - tempShape.startY);
+      } else if (tempShape.type === 'square') {
+        const size = Math.min(Math.abs(tempShape.endX - tempShape.startX), Math.abs(tempShape.endY - tempShape.startY));
+        const offsetX = (tempShape.endX >= tempShape.startX) ? size : -size;
+        const offsetY = (tempShape.endY >= tempShape.startY) ? size : -size;
+        ctx.fillRect(tempShape.startX, tempShape.startY, offsetX, offsetY);
+      } else if (tempShape.type === 'triangle') {
+        ctx.moveTo(tempShape.startX, tempShape.startY);
+        ctx.lineTo(tempShape.endX, tempShape.endY);
+        ctx.lineTo(tempShape.startX - (tempShape.endX - tempShape.startX), tempShape.endY);
+        ctx.closePath();
+        ctx.fill();
+      } else if (tempShape.type === 'sector') {
+        ctx.beginPath();
+        ctx.moveTo(tempShape.startX, tempShape.startY);
+        ctx.arc(tempShape.startX, tempShape.startY, Math.sqrt((tempShape.endX - tempShape.startX) ** 2 + (tempShape.endY - tempShape.startY) ** 2), tempShape.startAngle, tempShape.endAngle);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.stroke();
+    }
+  }
+
+  function resizeCanvasToDisplaySize() {
+    const displayWidth = canvas.clientWidth;
+    const displayHeight = canvas.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+      ctx.scale(dpr, dpr);
+      redrawCanvas();
+    }
+  }
+
+  let resizeTimeout;
+  function debounceResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => resizeCanvasToDisplaySize(), 100);
+  }
+  resizeCanvasToDisplaySize();
+  window.addEventListener('resize', debounceResize);
+
+  let currentSegment = null;
+  canvas.addEventListener('mousedown', e => {
+    const coords = getCanvasCoordinates(e);
+    startX = coords.x;
+    startY = coords.y;
+
+    if (dragging) {
+      selectedShape = shapes.slice().reverse().find(shape => isPointInShape(startX, startY, shape, true));
+      if (selectedShape) {
+        moving = true;
+        offsetX = startX - selectedShape.startX;
+        offsetY = startY - selectedShape.startY;
+        redrawCanvas();
+      } else {
+        selectedShape = null;
+        redrawCanvas();
+      }
+    } else if (currentShape !== 'none' && !addingText && !erasing) {
+      drawing = true;
+      previewShape = { type: currentShape, startX, startY, endX: startX, endY: startY, color: currentColor };
+    } else if (!addingText && !dragging && !erasing) {
+      drawing = true;
+      currentSegment = { points: [{ x: startX, y: startY }], color: currentColor };
+      drawnPath.push(currentSegment);
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+    }
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    const coords = getCanvasCoordinates(e);
+    endX = coords.x;
+    endY = coords.y;
+
+    canvas.style.cursor = 'none';
+    redrawCanvas();
+
+    if (erasing && e.buttons === 1) {
+      const newPaths = [];
+      drawnPath.forEach(segment => {
+        const splitSegments = splitPathSegment(segment, endX, endY);
+        newPaths.push(...splitSegments);
+      });
+      drawnPath = newPaths;
+      shapes = shapes.filter(shape => !isPointInShape(endX, endY, shape));
+      redrawCanvas();
+      ctx.beginPath();
+      ctx.arc(endX, endY, ERASER_RADIUS, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      ctx.fill();
+      ctx.stroke();
+    } else if (dragging && moving && selectedShape) {
+      selectedShape.startX = endX - offsetX;
+      selectedShape.startY = endY - offsetY;
+      if (selectedShape.type !== 'text') {
+        selectedShape.endX = selectedShape.startX + (selectedShape.endX - selectedShape.startX);
+        selectedShape.endY = selectedShape.startY + (selectedShape.endY - selectedShape.startY);
+      }
+      keepShapeInBounds(selectedShape);
+      redrawCanvas();
+      ctx.beginPath();
+      ctx.moveTo(endX - 10, endY);
+      ctx.lineTo(endX + 10, endY);
+      ctx.moveTo(endX, endY - 10);
+      ctx.lineTo(endX, endY + 10);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (drawing && currentShape !== 'none' && !addingText) {
+      previewShape.endX = endX;
+      previewShape.endY = endY;
+      redrawCanvas(previewShape);
+      ctx.beginPath();
+      ctx.moveTo(endX - 10, endY);
+      ctx.lineTo(endX + 10, endY);
+      ctx.moveTo(endX, endY - 10);
+      ctx.lineTo(endX, endY + 10);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (drawing && !addingText && !dragging && !erasing) {
+      currentSegment.points.push({ x: endX, y: endY });
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+      redrawCanvas();
+      ctx.beginPath();
+      ctx.arc(endX, endY, 2, 0, 2 * Math.PI);
+      ctx.fillStyle = currentColor;
+      ctx.fill();
+    } else if (!drawing && !addingText && !dragging && !erasing) {
+      ctx.beginPath();
+      ctx.arc(endX, endY, 2, 0, 2 * Math.PI);
+      ctx.fillStyle = currentColor;
+      ctx.fill();
+    } else if (!drawing && currentShape !== 'none' && !addingText && !dragging && !erasing) {
+      redrawCanvas({ type: currentShape, startX: endX, startY: endY, endX: endX + 50, endY: endY + 50, color: currentColor });
+      ctx.beginPath();
+      ctx.moveTo(endX - 10, endY);
+      ctx.lineTo(endX + 10, endY);
+      ctx.moveTo(endX, endY - 10);
+      ctx.lineTo(endX, endY + 10);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (addingText) {
+      ctx.beginPath();
+      ctx.moveTo(endX, endY - 10);
+      ctx.lineTo(endX, endY + 10);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  });
+
+  canvas.addEventListener('mouseup', e => {
+    if (drawing && currentShape !== 'none' && !addingText && !erasing) {
+      const newShape = { type: currentShape, startX, startY, endX, endY, color: currentColor };
+      keepShapeInBounds(newShape);
+      shapes.push(newShape);
+      previewShape = null;
+      redrawCanvas();
+    } else if (drawing && !addingText && !dragging && !erasing) {
+      redrawCanvas();
+    }
+    drawing = false;
+    moving = false;
+    currentSegment = null;
+    ctx.beginPath();
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    if (drawing && currentShape !== 'none' && !addingText && !erasing) {
+      const newShape = { type: currentShape, startX, startY, endX, endY, color: currentColor };
+      keepShapeInBounds(newShape);
+      shapes.push(newShape);
+      previewShape = null;
+    }
+    drawing = false;
+    moving = false;
+    currentSegment = null;
+    ctx.beginPath();
+    canvas.style.cursor = 'default';
+    redrawCanvas();
+  });
+
+  canvas.addEventListener('mouseenter', () => {
+    canvas.style.cursor = 'none';
+  });
+
+  canvas.addEventListener('click', e => {
+    if (addingText) {
+      const coords = getCanvasCoordinates(e);
+      const inputX = Math.min(coords.x, canvas.width - 200);
+      const inputY = Math.min(coords.y, canvas.height - 28);
+      textInput.style.left = `${canvas.offsetLeft + inputX / (window.devicePixelRatio || 1)}px`;
+      textInput.style.top = `${canvas.offsetTop + inputY / (window.devicePixelRatio || 1)}px`;
+      textInput.style.display = 'block';
+      textInput.value = '';
+      textInput.focus();
+      startX = inputX;
+      startY = inputY;
+    }
+  });
+
+  textInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      const text = textInput.value.trim();
+      if (text) {
+        const newShape = { type: 'text', text, startX, startY, color: currentColor };
+        keepShapeInBounds(newShape);
+        shapes.push(newShape);
+        redrawCanvas();
+      }
+      textInput.style.display = 'none';
+      textInput.value = '';
+      addingText = false;
+      canvas.style.cursor = 'none';
+    }
+  });
+
+  textInput.addEventListener('blur', () => {
+    const text = textInput.value.trim();
+    if (text) {
+      const newShape = { type: 'text', text, startX, startY, color: currentColor };
+      keepShapeInBounds(newShape);
+      shapes.push(newShape);
+      redrawCanvas();
+    }
+    textInput.style.display = 'none';
+    textInput.value = '';
+    addingText = false;
+    canvas.style.cursor = 'none';
+  });
+
+  document.getElementById('brushBtn').onclick = () => {
+    erasing = false;
+    currentShape = 'none';
+    addingText = false;
+    dragging = false;
+    textInput.style.display = 'none';
+    selectedShape = null;
+    canvas.style.cursor = 'none';
+    redrawCanvas();
+  };
+
+  document.getElementById('eraserBtn').onclick = () => {
+    erasing = true;
+    currentShape = 'none';
+    addingText = false;
+    dragging = false;
+    textInput.style.display = 'none';
+    selectedShape = null;
+    canvas.style.cursor = 'none';
+    redrawCanvas();
+  };
+
+  document.getElementById('shapeSelector').onchange = e => {
+    currentShape = e.target.value;
+    erasing = false;
+    addingText = false;
+    dragging = false;
+    textInput.style.display = 'none';
+    selectedShape = null;
+    canvas.style.cursor = 'none';
+    redrawCanvas();
+  };
+
+  document.getElementById('colorPicker').onchange = e => {
+    currentColor = e.target.value;
+  };
+
+  document.getElementById('textBtn').onclick = () => {
+    erasing = false;
+    currentShape = 'none';
+    addingText = true;
+    dragging = false;
+    textInput.style.display = 'none';
+    selectedShape = null;
+    canvas.style.cursor = 'none';
+    redrawCanvas();
+  };
+
+  document.getElementById('dragBtn').onclick = () => {
+    erasing = false;
+    currentShape = 'none';
+    addingText = false;
+    dragging = true;
+    textInput.style.display = 'none';
+    selectedShape = null;
+    canvas.style.cursor = 'none';
+    redrawCanvas();
+  };
+
+  document.getElementById('clearBtn').onclick = () => {
+    shapes = [];
+    drawnPath = [];
+    selectedShape = null;
+    textInput.style.display = 'none';
+    erasing = false;
+    currentShape = 'none';
+    addingText = false;
+    dragging = false;
+    canvas.style.cursor = 'none';
+    loadQuestion();
+  };
+
+  document.querySelectorAll('.tools button, .tools select').forEach(element => {
+    element.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        element.click();
+      }
+    });
+  });
+
+  const questions = [
+    {
+      type: 'mcq',
+      q: 'What is the volume of a prism with length 5 cm, width 3 cm, height 2 cm?',
+      options: ['a) 30 cu cm', 'b) 15 cu cm', 'c) 10 cu cm', 'd) 20 cu cm'],
+      ans: ['a) 30 cu cm']
+    },
+    {
+      type: 'drag',
+      q: 'Drag numbers to find the volume of a 4 × 3 × 2 cm prism.<br>Total: ⬜',
+      ans: ['24 cu cm'],
+      draggables: ['24 cu cm', '20 cu cm', '18 cu cm', '15 cu cm']
+    },
+    {
+      type: 'fill',
+      q: 'A prism has length 6 cm, width 4 cm, height ___ cm. Its volume is 48 cu cm. Find the height.<br>Answer: ⬜',
+      ans: ['2 cm']
+    },
+    {
+      type: 'match',
+      q: 'Match the prism to its volume:<br>3 × 3 × 4 → ⬜<br>5 × 2 × 3 → ⬜',
+      ans: ['36 cu cm', '30 cu cm'],
+      draggables: ['36 cu cm', '30 cu cm', '32 cu cm', '28 cu cm']
+    },
+    {
+      type: 'draw',
+      q: 'Draw a 2 × 3 × 4 cm prism and color it. What is its volume?<br>Answer: ⬜',
+      ans: ['24 cu cm']
+    },
+    {
+      type: 'word',
+      q: 'Vera stacks boxes (4 × 3 × 2 cm). If she uses 2 boxes, what’s the total volume?<br>Answer: ⬜',
+      ans: ['48 cu cm']
+    }
+  ];
+
+  let current = 0;
+  const questionEl = document.getElementById('question');
+  const resultEl = document.getElementById('result');
+  const nextBtn = document.getElementById('nextBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const mcqOptionsEl = document.getElementById('mcqOptions');
+  const dropZonesEl = document.getElementById('dropZones');
+  const progressFill = document.getElementById('progress-fill');
+  let draggables = [];
+
+  function updateProgressBar() {
+    const progress = ((current + 1) / questions.length) * 100;
+    progressFill.style.width = `${progress}%`;
+  }
+
+  function showCongratsModal() {
+    playCongratsSound();
+    congratsModal.style.display = 'block';
+    document.getElementById('closeModalBtn').focus();
+    const focusableElements = congratsModal.querySelectorAll('button');
+    const focusTrap = e => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        focusableElements[0].focus();
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('closeModalBtn').click();
+      }
+    };
+    congratsModal.addEventListener('keydown', focusTrap);
+    document.getElementById('closeModalBtn').onclick = () => {
+      congratsModal.style.display = 'none';
+      current = 0;
+      loadQuestion();
+      congratsModal.removeEventListener('keydown', focusTrap);
+    };
+  }
+
+  function checkAnswer() {
+    const q = questions[current];
+    let isCorrect = true;
+
+    if (q.type === 'mcq') {
+      const selectedOptions = Array.from(document.querySelectorAll('input[name="mcqOption"]:checked')).map(input => normalizeInput(input.value));
+      const correctAnswers = q.ans.map(ans => normalizeInput(ans));
+      isCorrect = selectedOptions.length === correctAnswers.length && 
+                 correctAnswers.every(ans => selectedOptions.includes(ans)) && 
+                 selectedOptions.every(opt => correctAnswers.includes(opt));
+      document.querySelectorAll('input[name="mcqOption"]').forEach(input => {
+        const label = input.parentElement;
+        label.classList.remove('correct', 'wrong');
+        if (input.checked) {
+          label.classList.add(correctAnswers.includes(normalizeInput(input.value)) ? 'correct' : 'wrong');
+        } else if (correctAnswers.includes(normalizeInput(input.value))) {
+          label.classList.add('wrong');
+        }
+      });
+    } else if (q.type === 'drag' || q.type === 'match') {
+      const answers = dropZones
+        .filter(zone => zone && zone.textContent !== undefined)
+        .map(zone => normalizeInput(zone.textContent));
+      const correctAnswers = q.ans.map(ans => normalizeInput(ans));
+      isCorrect = answers.length === correctAnswers.length && 
+                 correctAnswers.every((ans, i) => ans === answers[i]);
+      dropZones.forEach((zone, i) => {
+        if (zone) {
+          zone.classList.remove('correct', 'wrong');
+          zone.classList.add(isCorrect && i < answers.length ? 'correct' : 'wrong');
+        }
+      });
+      draggables.forEach(draggable => {
+        draggable.classList.remove('correct', 'wrong');
+        const draggableText = normalizeInput(draggable.textContent);
+        if (correctAnswers.includes(draggableText)) {
+          const zoneIndex = dropZones.findIndex(zone => zone && normalizeInput(zone.textContent) === draggableText);
+          draggable.classList.add(zoneIndex !== -1 && correctAnswers[zoneIndex] === draggableText ? 'correct' : 'wrong');
+        }
+      });
+    } else if (q.type === 'fill' || q.type === 'word' || q.type === 'draw') {
+      const answers = dropZones
+        .filter(zone => zone && zone.value !== undefined)
+        .map(zone => normalizeInput(zone.value));
+      const correctAnswers = q.ans.map(ans => normalizeInput(ans));
+      isCorrect = answers.length === correctAnswers.length && 
+                 correctAnswers.every((ans, i) => ans === answers[i]);
+      dropZones.forEach((zone, i) => {
+        if (zone) {
+          zone.classList.remove('correct', 'wrong');
+          zone.classList.add(isCorrect && i < answers.length ? 'correct' : 'wrong');
+        }
+      });
+    }
+
+    if (isCorrect) {
+      playSound(800, 0.3, 'triangle');
+      resultEl.textContent = '✔️ Correct!';
+      resultEl.style.color = '#4caf50';
+      if (q.type === 'mcq') {
+        document.querySelectorAll('input[name="mcqOption"]').forEach(input => input.disabled = true);
+      } else if (q.type === 'drag' || q.type === 'match') {
+        dropZones.forEach(zone => zone && zone.classList.add('disabled'));
+        draggables.forEach(draggable => draggable.setAttribute('draggable', false));
+      } else {
+        dropZones.forEach(zone => zone && (zone.disabled = true));
+      }
+      submitBtn.disabled = true;
+      if (current < questions.length - 1) {
+        nextBtn.style.display = 'inline-block';
+      } else {
+        showCongratsModal();
+      }
+      if (q.type === 'mcq' && current === 0 && normalizeInput(dropZones[0] && dropZones[0].textContent) === 'a) 30 cu cm') {
+        drawAreaModel([5, 3, 2], [1, 1, 1], canvas.width / 2 - 100, canvas.height / 2, 20);
+      } else if (q.type === 'drag' && current === 1 && dropZones.filter(zone => zone).map(zone => normalizeInput(zone.textContent)).join(' ') === '24 cu cm') {
+        drawAreaModel([4, 3, 2], [1, 1, 1], canvas.width / 2 - 100, canvas.height / 2, 20);
+      } else if (q.type === 'fill' && current === 2 && normalizeInput(dropZones[0] && dropZones[0].value) === '2 cm') {
+        drawAreaModel([6, 4, 2], [1, 1, 1], canvas.width / 2 - 100, canvas.height / 2, 20);
+      } else if (q.type === 'match' && current === 3 && dropZones.filter(zone => zone).map(zone => normalizeInput(zone.textContent)).join(' ') === '36 cu cm 30 cu cm') {
+        drawAreaModel([3, 3, 4], [1, 1, 1], canvas.width / 2 - 150, canvas.height / 2, 20);
+        drawAreaModel([5, 2, 3], [1, 1, 1], canvas.width / 2 + 50, canvas.height / 2, 20);
+      } else if (q.type === 'draw' && current === 4 && normalizeInput(dropZones[0] && dropZones[0].value) === '24 cu cm') {
+        drawAreaModel([2, 3, 4], [1, 1, 1], canvas.width / 2 - 100, canvas.height / 2, 20);
+      } else if (q.type === 'word' && current === 5 && normalizeInput(dropZones[0] && dropZones[0].value) === '48 cu cm') {
+        drawAreaModel([4, 3, 2], [2, 1, 1], canvas.width / 2 - 100, canvas.height / 2, 20);
+      }
+    } else {
+      playSound(300, 0.3, 'triangle');
+      resultEl.textContent = '❌ Try Again';
+      resultEl.style.color = '#d32f2f';
+      if (q.type === 'mcq' && current === 0) {
+        shapes = [];
+      } else if (q.type === 'drag' && current === 1) {
+        shapes = [];
+      } else if (q.type === 'fill' && current === 2) {
+        shapes = [];
+      } else if (q.type === 'match' && current === 3) {
+        shapes = [];
+      } else if (q.type === 'draw' && current === 4) {
+        shapes = [];
+      } else if (q.type === 'word' && current === 5) {
+        shapes = [];
+      }
+    }
+  }
+
+  function loadQuestion() {
+    if (!questions[current]) {
+      console.error('No question found at index', current);
+      questionEl.textContent = 'Error: No question available';
+      return;
+    }
+    const q = questions[current];
+    if ((q.type === 'mcq' || q.type === 'drag' || q.type === 'match') && (!q.options && !q.draggables || !q.ans)) {
+      console.error('Invalid question', q);
+      questionEl.textContent = 'Error: Invalid question format';
+      return;
+    }
+    if ((q.type === 'fill' || q.type === 'word' || q.type === 'draw') && !q.ans) {
+      console.error('Invalid fill question', q);
+      questionEl.textContent = 'Error: Invalid question format';
+      return;
+    }
+    dropZones = [];
+    draggables = [];
+    mcqOptionsEl.innerHTML = '';
+    dropZonesEl.innerHTML = '';
+    questionEl.innerHTML = `Solve: <strong>${q.q}</strong>`;
+
+    if (q.type === 'mcq') {
+      q.options.forEach((option, index) => {
+        const label = document.createElement('label');
+        label.style.display = 'block';
+        const input = document.createElement('input');
+        input.type = q.ans.length > 1 ? 'checkbox' : 'radio';
+        input.name = 'mcqOption';
+        input.value = option;
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(` ${option}`));
+        mcqOptionsEl.appendChild(label);
+      });
+      document.querySelectorAll('input[name="mcqOption"]').forEach(input => {
+        input.addEventListener('change', () => {
+          if (input.checked) playSound(500, 0.1, 'sine');
+          updateSubmitButton();
+        });
+      });
+    } else if (q.type === 'drag' || q.type === 'match') {
+      let tempText = q.q;
+      for (let i = 0; i < q.ans.length; i++) {
+        tempText = tempText.replace('⬜', `<span class="dropZone" id="dropZone${i + 1}" aria-label="Drop zone ${i + 1}"></span>`);
+      }
+      questionEl.innerHTML = `Solve: <strong>${tempText}</strong>`;
+      dropZones = Array.from(document.querySelectorAll('.dropZone')).filter(zone => zone !== null);
+      if (dropZones.length !== q.ans.length) {
+        console.warn('Mismatch in drop zones count:', dropZones.length, 'expected:', q.ans.length);
+      }
+      q.draggables.forEach((option, index) => {
+        const draggable = document.createElement('span');
+        draggable.className = 'draggable';
+        draggable.textContent = option;
+        draggable.setAttribute('draggable', true);
+        draggable.id = `draggable${index + 1}`;
+        draggable.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', e.target.textContent);
+          e.target.style.opacity = '0.5';
+        });
+        draggable.addEventListener('dragend', e => {
+          e.target.style.opacity = '1';
+        });
+        mcqOptionsEl.appendChild(draggable);
+      });
+      draggables = Array.from(document.querySelectorAll('.draggable'));
+      dropZones.forEach((zone, index) => {
+        if (zone) {
+          zone.addEventListener('dragover', e => {
+            e.preventDefault();
+          });
+          zone.addEventListener('drop', e => {
+            e.preventDefault();
+            const data = e.dataTransfer.getData('text/plain');
+            if (!zone.classList.contains('disabled')) {
+              zone.textContent = data;
+              playSound(500, 0.1, 'sine');
+              updateSubmitButton();
+            }
+          });
+        }
+      });
+    } else if (q.type === 'fill' || q.type === 'word' || q.type === 'draw') {
+      let tempText = q.q;
+      for (let i = 0; i < q.ans.length; i++) {
+        tempText = tempText.replace('⬜', `<input type="text" class="dropZone" id="dropZone${i + 1}" aria-label="Answer input ${i + 1}">`);
+      }
+      questionEl.innerHTML = `Solve: <strong>${tempText}</strong>`;
+      dropZones = Array.from(document.querySelectorAll('.dropZone')).filter(zone => zone !== null);
+      if (dropZones.length !== q.ans.length) {
+        console.warn('Mismatch in drop zones count:', dropZones.length, 'expected:', q.ans.length);
+      }
+      dropZones.forEach((zone, index) => {
+        if (zone) {
+          zone.value = '';
+          zone.classList.remove('correct', 'wrong');
+          zone.disabled = false;
+          zone.addEventListener('input', () => {
+            playSound(500, 0.1, 'sine');
+            updateSubmitButton();
+          });
+        }
+      });
+    }
+
+    if (dropZones.length > 0 && q.type !== 'drag' && q.type === 'match') {
+      setTimeout(() => {
+        const firstZone = dropZones[0];
+        if (firstZone) firstZone.focus();
+      }, 0);
+    }
+    resultEl.textContent = '';
+    nextBtn.style.display = 'none';
+    submitBtn.disabled = true;
+
+    shapes = [];
+    drawnPath = [];
+    selectedShape = null;
+    textInput.style.display = 'none';
+    canvas.style.cursor = 'none';
+
+    redrawCanvas();
+    updateProgressBar();
+  }
+
+  function updateSubmitButton() {
+    const q = questions[current];
+    if (q.type === 'mcq') {
+      submitBtn.disabled = document.querySelectorAll('input[name="mcqOption"]:checked').length === 0;
+    } else if (q.type === 'drag' || q.type === 'match') {
+      const validDropZones = dropZones.filter(zone => zone && zone.textContent !== undefined);
+      submitBtn.disabled = validDropZones.length === 0 || !validDropZones.every(zone => normalizeInput(zone.textContent).length > 0);
+    } else if (q.type === 'fill' || q.type === 'word' || q.type === 'draw') {
+      const validDropZones = dropZones.filter(zone => zone && zone.value !== undefined);
+      submitBtn.disabled = validDropZones.length === 0 || !validDropZones.every(zone => normalizeInput(zone.value).length > 0);
+    }
+  }
+
+  nextBtn.onclick = () => {
+    playSound(700, 0.1, 'square');
+    current++;
+    loadQuestion();
+  };
+
+  submitBtn.onclick = () => {
+    playSound(600, 0.05, 'square');
+    checkAnswer();
+  };
+
+  restartBtn.onclick = () => {
+    playSound(700, 0.1, 'square');
+    current = 0;
+    loadQuestion();
+  };
+
+  loadQuestion();
+</script>
+</body>
+</html>
